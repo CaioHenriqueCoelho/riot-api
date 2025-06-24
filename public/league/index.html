@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerar Overlay LoL Para Twitch</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1c1c1c, #2a2a2a);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      color: #007bff;
+    }
+
+    .form-container {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .input-row select,
+    .input-row input {
+      padding: 10px;
+      flex: 1;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 1rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      max-width: 600px;
+    }
+
+    #resultado p {
+      margin-bottom: 10px;
+    }
+
+    .link-display {
+      background-color: #222;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-family: monospace;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      word-break: break-all;
+    }
+
+    .copy-icon {
+      cursor: pointer;
+      color: #007bff;
+      font-size: 1.2rem;
+    }
+
+    iframe {
+      margin-top: 20px;
+      border: none;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Gerar Overlay LoL Para Twitch</h1>
+
+  <div class="form-container" id="inputRow">
+    <div class="input-row" >
+      <select id="regiao">
+        <option value="br1">BR</option>
+        <option value="na1">NA</option>
+      </select>
+
+      <input type="text" id="nickname" placeholder="Ex: Leleco#BR1" autocomplete="on" />
+    </div>
+
+    <button onclick="gerarLink()">Gerar</button>
+  </div>
+
+  <div id="resultado"></div>
+  <div id="previewContainer"></div>
+
+  <script>
+    function gerarLink() {
+      const regiao = document.getElementById("regiao").value;
+      let nicknameInput = document.getElementById("nickname").value.trim();
+
+      if (!nicknameInput.includes("#")) {
+        alert("Insira o nome no formato Nome#TAG.");
+        return;
+      }
+
+      nicknameInput = nicknameInput.replace(' #', '#');
+      let nomeUrl = encodeURIComponent(nicknameInput).replace('%23', '#');
+      const url = `http://localhost:3000/league/show.html?region=${regiao}/${nomeUrl}`;
+
+      const resultado = document.getElementById("inputRow");
+      resultado.innerHTML += `
+        <p>Só criar a cena de navegador no OBS e colar o link abaixo:</p>
+        <div class="link-display">
+          <label id="linkGerado">${url}</label>
+          <i class="fa fa-copy copy-icon" onclick="copiarLink()"></i>
+        </div>
+      `;
+
+      const previewContainer = document.getElementById("previewContainer");
+      previewContainer.innerHTML = `<iframe src="${url}" style="width:800px;height:270px" title="Preview Overlay" sandbox="allow-scripts allow-same-origin allow-popups allow-top-navigation allow-top-navigation-by-user-activation"></iframe>`;
+    }
+
+    function copiarLink() {
+      const text = document.getElementById("linkGerado").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        
+      });
+    }
+  </script>
+
+</body>
+</html>

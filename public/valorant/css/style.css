@@ -1,0 +1,83 @@
+ * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: #ffffff;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #overlay-container {
+      background: linear-gradient(135deg, #1e1e2f, #12121c);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 17px;
+      max-width: 600px;
+
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      display: flex;
+      
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .info-group, .info-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      gap: 5px;
+ 
+
+    }
+
+    #name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #00ffcc;
+    }
+
+    #rank-points {
+      font-size: 1.1rem;
+      color: #dddddd;
+    }
+
+    #resultado {
+      font-size: 1rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    #elo-image {
+      max-width: 100px;
+      border-radius: 8px;
+
+    }
+
+    .inline-icon {
+      height: 24px;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 600px) {
+      #overlay-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .info-group, .info-right {
+        align-items: center;
+        text-align: center;
+      }
+    }

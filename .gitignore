@@ -1,0 +1,53 @@
+# Diretórios do Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Arquivos de ambiente (NUNCA suba para o Git)
+.env
+.env.test
+.env.production
+.env.local
+.env.*.local
+
+# Pastas de log
+logs/
+*.log
+log.txt
+
+# Cache de pacotes
+.cache/
+.pnpm-debug.log
+
+# Diretórios de build
+dist/
+build/
+out/
+
+# Configurações de IDEs e editores
+.vscode/
+.idea/
+*.sw?
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Testes
+coverage/
+*.lcov
+
+# PM2
+pids/
+*.pid
+*.seed
+
+# Docker
+docker-compose.override.yml
+
+# Outros
+*.tgz
+*.bak
+*.tmp

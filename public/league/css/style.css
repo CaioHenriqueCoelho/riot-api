@@ -1,0 +1,89 @@
+  * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #overlay-container {
+      background: rgba(30, 30, 47, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 5px 20px 5px 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .info-group {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+    }
+
+    .info-right{
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #name {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #00ffd0;
+    }
+
+    #rank-points {
+      font-size: 1.2rem;
+      color: #ccc;
+    }
+
+    #resultado {
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .inline-icon {
+      height: 50px;
+      vertical-align: middle;
+    }
+
+    #elo-image {
+      max-width: 90px;
+      border-radius: 12px;
+    }
+
+    #kda {
+      font-size: 0.95rem;
+      margin-top: -10px;
+      color: #aaa;
+    }
+
+    @media (max-width: 640px) {
+      #overlay-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .info-group, .info-right {
+        align-items: center;
+      }
+    }

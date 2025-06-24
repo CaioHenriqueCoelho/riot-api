@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buscar LP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="overlay-container">
+    <div class="info-group">
+      <div id="name"></div>
+      <div id="rank-points"></div>
+      <div id="resultado">
+        <span></span>
+        <img class="inline-icon" src="" alt="" />
+      </div>
+    </div>
+    <div class="info-right">
+      <img id="elo-image" src="" alt="Elo do jogador" />
+      <h2 id="kda"></h2>
+    </div>
+  </div>
+
+  <script>
+    const elos = ["IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER"];
+    const ranks = ["IV", "III", "II", "I"];
+    const pontosPorDivisao = 100;
+    let server = '';
+
+    calcularVitoriasNecessarias();
+    setInterval(calcularVitoriasNecessarias, 40000);
+    setInterval(() => location.reload(), 20 * 60 * 1000);
+
+    async function getUserInfo() {
+      const query = window.location.href.split('?')[1];
+      if (!query) return showError("Use: ?region=br1/nome#tag");
+
+      const match = query.match(/^region=([^\/]+)\/([^#]+)#(.+)$/);
+      if (!match) return showError("Formato inválido. Use: ?region=br1/nome#tag");
+
+      [, server, name, tag] = match;
+      document.getElementById("name").innerText = decodeURIComponent(`${name}#${tag}`);
+
+      try {
+        const res = await fetch(`/api/riot-league/player/${server}/${name}/${tag}`);
+        const data = await res.json();
+        if (!data.info) return showError("Dados não encontrados.");
+        return data.info;
+      } catch (err) {
+        console.error("Erro API:", err);
+        return showError("Erro ao buscar dados.");
+      }
+    }
+
+    async function calcularVitoriasNecessarias() {
+      const jogador = await getUserInfo();
+      if (!jogador) return;
+
+      const { wins = 0, losses = 0, leaguePoints = 0, tier = '', rank = '' } = jogador;
+      const cutoff = jogador.cutoff || 0;
+      const rankCompleto = `${capitalize(tier.toLowerCase())} ${rank}`;
+
+      document.getElementById("elo-image").src = `/league/images/${tier}.png`;
+      document.getElementById("elo-image").alt = tier;
+      document.getElementById("rank-points").innerText = `${rankCompleto} - ${leaguePoints} LP`;
+      document.getElementById("kda").innerHTML = `
+        <span style="color: #00ff00;">W: ${wins}</span> |
+        <span style="color: #ff4d4d;">L: ${losses}</span>
+      `;
+
+      const pontosFaltando = calcularPontosAteEloAlvo(tier, rank, leaguePoints, 'MASTER') + cutoff;
+      const vitoriasNecessarias = Math.ceil(pontosFaltando / 20);
+
+      document.getElementById("resultado").innerHTML = pontosFaltando <= 0
+        ? `Parabéns! Você conseguiu!`
+        : `${vitoriasNecessarias} Wins para o 
+          <img src="/league/images/CHALLENGER.png" alt="Challenger" class="inline-icon" />`;
+    }
+
+    function calcularPontosAteEloAlvo(tierAtual, rankAtual, lpAtual, tierAlvo) {
+      const eloIndexAtual = elos.indexOf(tierAtual.toUpperCase());
+      const rankIndexAtual = ranks.indexOf(rankAtual.toUpperCase());
+      const eloIndexAlvo = elos.indexOf(tierAlvo.toUpperCase());
+
+      if (eloIndexAtual === -1 || rankIndexAtual === -1 || eloIndexAlvo <= eloIndexAtual) return 0;
+
+      let pontosFaltando = (ranks.length - rankIndexAtual - 1) * pontosPorDivisao + (pontosPorDivisao - lpAtual);
+      for (let i = eloIndexAtual + 1; i < eloIndexAlvo; i++) {
+        pontosFaltando += ranks.length * pontosPorDivisao;
+      }
+
+      return pontosFaltando;
+    }
+
+    function showError(msg) {
+      document.getElementById("resultado").innerText = msg;
+      return null;
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+  </script>
+</body>
+</html>
