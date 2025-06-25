@@ -41,7 +41,7 @@
 
       nicknameInput = nicknameInput.replace(' #', '#');
       let nomeUrl = encodeURIComponent(nicknameInput).replace('%23', '#');
-      const url = `http://localhost:3000/valorant/show.html?region=${regiao}/${nomeUrl}`;
+      const url = `https://riot-api-o66o.onrender.com/valorant/show.html?region=${regiao}/${nomeUrl}`;
 
       const resultado = document.getElementById("resultado");
       resultado.innerHTML = `
