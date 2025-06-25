@@ -32,7 +32,7 @@
     let server = '';
 
     calcularVitoriasNecessarias();
-    setInterval(calcularVitoriasNecessarias, 40000);
+    setInterval(calcularVitoriasNecessarias, 60 * 1000);
     setInterval(() => location.reload(), 20 * 60 * 1000);
 
     async function getUserInfo() {
