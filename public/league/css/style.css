@@ -24,8 +24,8 @@
       display: flex;
       gap: 30px;
       flex-wrap: wrap;
-      max-width: 500px;
-      width: 100%;
+
+      width: auto;
     }
 
     .info-group {

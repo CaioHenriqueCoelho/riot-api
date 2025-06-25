@@ -74,8 +74,8 @@
 
       const pontosFaltando = calcularPontosAteEloAlvo(tier, rank, leaguePoints, 'MASTER') + cutoff;
       const vitoriasNecessarias = Math.ceil(pontosFaltando / 20);
-
-      document.getElementById("resultado").innerHTML = rankCompleto == 'Challenger' ? `Parabéns! Você conseguiu!`
+      console.log(rankCompleto);
+      document.getElementById("resultado").innerHTML = rankCompleto == 'Challenger I' ? `Parabéns! Você conseguiu!`
         : `${vitoriasNecessarias} Wins para o 
           <img src="/league/images/CHALLENGER.png" alt="Challenger" class="inline-icon" />`;
     }
