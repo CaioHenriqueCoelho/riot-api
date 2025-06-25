@@ -40,7 +40,7 @@
 
     calcularVitoriasNecessarias();
 
-    setInterval(calcularVitoriasNecessarias, 40000); // Recalcula a cada 40s
+    setInterval(calcularVitoriasNecessarias, 60 * 1000); // Recalcula a cada 1min
     setInterval(() => location.reload(), 20 * 60 * 1000); // Recarrega a cada 20min
 
     async function calcularVitoriasNecessarias() {
