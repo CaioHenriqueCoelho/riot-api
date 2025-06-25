@@ -96,7 +96,7 @@
 
   <h1>Gerar Overlay LoL Para Twitch</h1>
 
-  <div class="form-container" id="inputRow">
+  <div class="form-container" id="">
     <div class="input-row" >
       <select id="regiao">
         <option value="br1">BR</option>
@@ -107,10 +107,10 @@
     </div>
 
     <button onclick="gerarLink()">Gerar</button>
+    <div id="resultado"></div>
   </div>
 
-  <div id="resultado"></div>
-  <div id="previewContainer"></div>
+  <div id="inputRow"></div>
 
   <script>
     function gerarLink() {
