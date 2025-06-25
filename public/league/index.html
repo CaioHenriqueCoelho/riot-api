@@ -127,7 +127,7 @@
       const url = `https://desafiante.online/league/show.html?region=${regiao}/${nomeUrl}`;
 
       const resultado = document.getElementById("inputRow");
-      resultado.innerHTML += `
+      resultado.innerHTML = `
         <p>Só criar a cena de navegador no OBS e colar o link abaixo:</p>
         <div class="link-display">
           <label id="linkGerado">${url}</label>
