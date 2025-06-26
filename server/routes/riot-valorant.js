@@ -83,7 +83,6 @@ async function fetchTodayInfo(name, tag) {
 
     const todaysMatches = matches.filter(match => {
       const matchDate = match.date.split('T')[0];
-      console.log("data da api",match.date.split('T')[0]);
       return matchDate === todayDate;
     });
 
