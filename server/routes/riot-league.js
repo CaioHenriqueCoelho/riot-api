@@ -105,14 +105,27 @@ async function fetchLeagueData(region, puuid, tentativas = 5) {
 
 async function fetchChallengerCutoff(region) {
   const url = `${CHALLENGER_API_URL}?platform_id=${region}&lane=All&page=1`;
-  console.log("url cutoff", url);
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Falha ao buscar cutoff do Challenger');
-  }
+  console.log("[fetchChallengerCutoff] URL:", url);
 
-  const data = await response.json();
-  return data.challenger_cut_off;
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Status: ${response.status} - ${response.statusText} | Body: ${errorText}`);
+    }
+
+    const data = await response.json();
+
+    if (!data || typeof data.challenger_cut_off === 'undefined') {
+      throw new Error('Campo challenger_cut_off ausente na resposta');
+    }
+
+    return data.challenger_cut_off;
+  } catch (err) {
+    console.error(`[Erro em fetchChallengerCutoff]:`, err.message);
+    throw err; // Propaga o erro para ser tratado por quem chamou
+  }
 }
 
 module.exports = router;
