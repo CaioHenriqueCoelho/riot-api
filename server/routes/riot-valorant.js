@@ -83,6 +83,7 @@ async function fetchTodayInfo(name, tag) {
 
     const todaysMatches = matches.filter(match => {
       const matchDate = match.date.split('T')[0];
+      console.log("data da api",match.date.split('T')[0]);
       return matchDate === todayDate;
     });
 
@@ -115,6 +116,7 @@ async function fetchTodayInfo(name, tag) {
 // Função utilitária para pegar a data local no formato YYYY-MM-DD
 function getLocalDateString(date = new Date()) {
   const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  console.log("data aqui",localDate);
   return localDate.toISOString().split('T')[0];
 }
 
