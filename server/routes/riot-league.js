@@ -105,7 +105,7 @@ async function fetchLeagueData(region, puuid, tentativas = 5) {
 
 async function fetchChallengerCutoff(region) {
   const url = `${CHALLENGER_API_URL}?platform_id=${region}&lane=All&page=1`;
-
+  console.log("url cutoff", url);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error('Falha ao buscar cutoff do Challenger');
