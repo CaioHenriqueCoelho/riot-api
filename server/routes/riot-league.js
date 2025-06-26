@@ -108,7 +108,12 @@ async function fetchChallengerCutoff(region) {
   console.log("[fetchChallengerCutoff] URL:", url);
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url,{
+    headers: {
+      'User-Agent': 'Mozilla/5.0',
+      'Accept': 'application/json',
+      }
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
