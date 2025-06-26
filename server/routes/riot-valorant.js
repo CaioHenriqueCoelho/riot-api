@@ -115,9 +115,10 @@ async function fetchTodayInfo(name, tag) {
 
 // Função utilitária para pegar a data local no formato YYYY-MM-DD
 function getLocalDateString(date = new Date()) {
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  console.log("data aqui",localDate);
-  return localDate.toISOString().split('T')[0];
+  // Força o horário do Brasil (GMT-3)
+  const BRAZIL_OFFSET_MS = 3 * 60 * 60 * 1000; // 3 horas em milissegundos
+  const brazilTime = new Date(date.getTime() - BRAZIL_OFFSET_MS);
+  return brazilTime.toISOString().split('T')[0];
 }
 
 // Função para determinar o status do mmr
