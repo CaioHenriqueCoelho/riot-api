@@ -101,6 +101,7 @@ async function fetchTodayInfo(name, tag) {
       loses,
       winrate: totalGames > 0 ? `${((wins / totalGames) * 100).toFixed(2)}%` : '0%'
     };
+    console.log("resultado",resultado);
 
 
     return resultado;
