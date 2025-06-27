@@ -43,68 +43,32 @@
     setInterval(calcularVitoriasNecessarias, 60 * 1000); // Recalcula a cada 1min
     setInterval(() => location.reload(), 20 * 60 * 1000); // Recarrega a cada 20min
 
-async function calcularVitoriasNecessarias() {
-  const jogador = await buscarDadosDoJogador();
-  if (!jogador) return;
+    async function calcularVitoriasNecessarias() {
+      const jogador = await buscarDadosDoJogador();
+      if (!jogador) return;
 
-  // Desestruturação dos dados do MMR
-  const { currenttierpatched, ranking_in_tier, images } = jogador.mmr;
-  const [tier, division] = currenttierpatched.split(" ");
+      const { currenttierpatched, ranking_in_tier, images } = jogador.mmr;
+      const [tier, division] = currenttierpatched.split(" ");
 
-  // Atualiza a interface com os dados atuais
-  atualizarUI(tier, division, ranking_in_tier, images.small);
+      atualizarUI(tier, division, ranking_in_tier, images.small);
 
-  // Calcula winrate do dia
-  const totalPartidas = jogador.today.wins + jogador.today.loses;
-  const winRate = totalPartidas > 0 ? (jogador.today.wins / totalPartidas) * 100 : 0;
-  const winRateFormatted = winRate.toFixed(2);
+      if (tier !== "Radiant") {
+        if(tier !== "Immortal"){
+          const pontosRestantes = calcularPontosRestantes(
+            tier.toUpperCase(),
+            division,
+            ranking_in_tier,
+            "IMMORTAL"
+            ) + CUTOFF;
 
-  // Define cor e símbolo com base no status do dia
-  let color;
-  let operador;
-  switch (jogador.today.status) {
-    case "positivo":
-      color = "#00ff00";
-      operador = "+";
-      break;
-    case "negativo":
-      color = "#ff4d4d";
-      operador = "-";
-      break;
-    default:
-      color = "#cccccc";
-      operador = "";
-  }
-
-  // Atualiza o elemento com os dados de desempenho do dia
-  document.getElementById("kda").innerHTML = `
-    Day:
-    <span style="color: #00ff00;"> W: ${jogador.today.wins}</span> |
-    <span style="color: #ff4d4d;">L: ${jogador.today.loses}</span>
-    <p style="color: ${color};">RR: ${operador}${jogador.today.mmr_total} | ${winRateFormatted}%</p>
-  `;
-
-  // Cálculo de progresso para próxima divisão
-  if (tier === "Radiant") {
-    document.getElementById("resultado").innerText = "Você já está no Radiant!";
-    return;
-  }
-
-  let pontosRestantes, vitoriasNecessarias;
-
-  if (tier !== "Immortal") {
-    pontosRestantes = calcularPontosRestantes(
-      tier.toUpperCase(),
-      division,
-      ranking_in_tier,
-      "IMMORTAL"
-    ) + CUTOFF;
-  } else {
-    pontosRestantes = CUTOFF - ranking_in_tier;
-  }
-
-  vitoriasNecessarias = Math.ceil(pontosRestantes / LP_POR_VITORIA);
-  exibirResultado(pontosRestantes, vitoriasNecessarias);
+          const vitoriasNecessarias = Math.ceil(pontosRestantes / LP_POR_VITORIA);
+          exibirResultado(pontosRestantes, vitoriasNecessarias);
+        }else{
+          const pontosRestantes = CUTOFF - ranking_in_tier;
+          console.log("falta qnts pontos?",pontosRestantes);
+          const vitoriasNecessarias = Math.ceil(pontosRestantes / LP_POR_VITORIA);
+          exibirResultado(pontosRestantes, vitoriasNecessarias);
+        }
 }
 
 
