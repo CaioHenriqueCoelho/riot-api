@@ -18,12 +18,12 @@ router.get('/player/:region/:name/:tag', async (req, res) => {
   try {
     const account = await fetchAccountData(name, tag);
     const mmrData = await fetchValorantMMR(region, name, tag);
-    const todayInfo = await fetchTodayInfo(name,tag);
+    mmrData.vitoriasNecessarias = calcularVitoriasNecessariasValorant(mmrData).vitoriasNecessarias;
     if (!mmrData) {
       return res.status(404).json({ error: 'Dados de MMR não encontrados' });
     }
 
-    return res.json({ account, mmr: mmrData, today: todayInfo });
+    return res.json({ account, mmr: mmrData});
   } catch (err) {
     console.error('[Erro /valorant/player]:', err.message);
     return res.status(500).json({ error: 'Erro ao buscar dados do jogador' });
@@ -47,11 +47,6 @@ async function fetchAccountData(name, tag) {
 async function fetchValorantMMR(region, name, tag) {
 const VALORANT_API_TOKEN = process.env.HENRIKDEV_API_TOKEN; // coloque isso no seu .env se for usar 
   const url = `https://api.henrikdev.xyz/valorant/v1/mmr/br/${name}/${tag}?api_key=${VALORANT_API_TOKEN}`;
-  const headers = {
-    'Content-Type': 'application/json',
-  };
-
-
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -65,66 +60,77 @@ const VALORANT_API_TOKEN = process.env.HENRIKDEV_API_TOKEN; // coloque isso no s
   return data.data;
 }
 
-async function fetchTodayInfo(name, tag) {
-  const VALORANT_API_TOKEN = process.env.HENRIKDEV_API_TOKEN;
-  const url = `https://api.henrikdev.xyz/valorant/v1/lifetime/mmr-history/br/${name}/${tag}?api_key=${VALORANT_API_TOKEN}`;
+function calcularVitoriasNecessariasValorant(mmr) {
+  const TIERS = [
+    "IRON", "BRONZE", "SILVER", "GOLD",
+    "PLATINUM", "DIAMOND", "ASCENDANT", "IMMORTAL"
+  ];
+  const DIVISIONS = ["1", "2", "3"];
+  const LP_POR_DIVISAO = 100;
+  const CUTOFF = 340;
+  const LP_POR_VITORIA = 17;
 
-  try {
-    const response = await fetch(url);
-    const result = await response.json();
+  if (!mmr || !mmr.currenttierpatched || mmr.ranking_in_tier == null) {
+    return {
+      error: 'Dados de MMR incompletos',
+      vitoriasNecessarias: 0
+    };
+  }
 
-    if (!result.data || !Array.isArray(result.data)) {
-      console.error("Dados inválidos ou ausentes.");
-      return [];
+  const [tier, division] = mmr.currenttierpatched.split(" ");
+  const tierUpper = tier?.toUpperCase();
+  const lpAtual = mmr.ranking_in_tier;
+
+  if (tierUpper === "RADIANT") {
+    return {
+      mensagem: 'Jogador já está no Radiant',
+      vitoriasNecessarias: 0
+    };
+  }
+
+  if (tierUpper !== "IMMORTAL") {
+    const tierIndexAtual = TIERS.indexOf(tierUpper);
+    const divisaoIndexAtual = DIVISIONS.indexOf(division);
+    const tierIndexAlvo = TIERS.indexOf("IMMORTAL");
+
+    if (
+      tierIndexAtual === -1 ||
+      divisaoIndexAtual === -1 ||
+      tierIndexAlvo === -1 ||
+      tierIndexAlvo <= tierIndexAtual
+    ) {
+      return {
+        error: 'Rank atual inválido ou já superior',
+        vitoriasNecessarias: 0
+      };
     }
 
-    const matches = result.data;
-    const todayDate = getLocalDateString();
+    let pontosRestantes = (DIVISIONS.length - divisaoIndexAtual - 1) * LP_POR_DIVISAO;
+    pontosRestantes += LP_POR_DIVISAO - lpAtual;
 
-    const todaysMatches = matches.filter(match => {
-      const matchDate = match.date.split('T')[0];
-      return matchDate === todayDate;
-    });
+    for (let i = tierIndexAtual + 1; i < tierIndexAlvo; i++) {
+      pontosRestantes += DIVISIONS.length * LP_POR_DIVISAO;
+    }
 
-    const mmrChanges = todaysMatches.map(m => m.last_mmr_change);
-    const mmrTotal = mmrChanges.reduce((sum, val) => sum + val, 0);
+    pontosRestantes += CUTOFF;
 
-    const wins = mmrChanges.filter(val => val > 0).length;
-    const loses = mmrChanges.filter(val => val < 0).length;
-    const totalGames = wins + loses;
-
-    const resultado = {
-      partidas: todaysMatches.length,
-      mmr_total: mmrTotal,
-      status: getMMRStatus(mmrTotal),
-      wins,
-      loses,
-      winrate: totalGames > 0 ? `${((wins / totalGames) * 100).toFixed(2)}%` : '0%'
+    return {
+      tier: tierUpper,
+      division,
+      lpAtual,
+      pontosRestantes,
+      vitoriasNecessarias: Math.ceil(pontosRestantes / LP_POR_VITORIA)
     };
-    console.log("resultado",resultado);
-
-
-    return resultado;
-
-  } catch (error) {
-    console.error("Erro ao buscar os dados:", error);
-    return [];
+  } else {
+    const pontosRestantes = CUTOFF - lpAtual;
+    return {
+      tier: tierUpper,
+      division,
+      lpAtual,
+      pontosRestantes,
+      vitoriasNecessarias: Math.ceil(pontosRestantes / LP_POR_VITORIA)
+    };
   }
-}
-
-// Função utilitária para pegar a data local no formato YYYY-MM-DD
-function getLocalDateString(date = new Date()) {
-  // Força o horário do Brasil (GMT-3)
-  const BRAZIL_OFFSET_MS = 3 * 60 * 60 * 1000; // 3 horas em milissegundos
-  const brazilTime = new Date(date.getTime() - BRAZIL_OFFSET_MS);
-  return brazilTime.toISOString().split('T')[0];
-}
-
-// Função para determinar o status do mmr
-function getMMRStatus(mmrTotal) {
-  if (mmrTotal > 0) return 'positivo';
-  if (mmrTotal < 0) return 'negativo';
-  return 'neutro';
 }
 
 

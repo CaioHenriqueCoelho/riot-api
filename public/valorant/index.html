@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.5" />
   <title>Gerar Overlay Valorant Para Twitch</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="css/index.css">
@@ -41,7 +41,8 @@
 
       nicknameInput = nicknameInput.replace(' #', '#');
       let nomeUrl = encodeURIComponent(nicknameInput).replace('%23', '#');
-      const url = `https://desafiante.online/valorant/show.html?region=${regiao}/${nomeUrl}`;
+      const host = window.location.origin;
+      const url = `${host}/valorant/show.html?region=${regiao}/${nomeUrl}`;
 
       const resultado = document.getElementById("resultado");
       resultado.innerHTML = `

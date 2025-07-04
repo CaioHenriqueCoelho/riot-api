@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>Buscar LP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
@@ -15,10 +14,7 @@
     <div class="info-group">
       <div id="name"></div>
       <div id="rank-points"></div>
-      <div id="resultado">
-        <span></span>
-        <img class="inline-icon" src="" alt="" />
-      </div>
+      <div id="resultado"></div>
     </div>
     <div class="info-right">
       <img id="elo-image" src="" alt="Elo do jogador" />
@@ -27,121 +23,97 @@
   </div>
 
   <script>
-    const TIERS = [
-      "IRON", "BRONZE", "SILVER", "GOLD",
-      "PLATINUM", "DIAMOND", "ASCENDANT", "IMMORTAL"
-    ];
-    const DIVISIONS = ["1", "2", "3"];
-    const LP_POR_DIVISAO = 100;
-    const CUTOFF = 340;
-    const LP_POR_VITORIA = 17;
+    const IMMORTAL_ICON_URL = "https://imgsvc.trackercdn.com/url/max-width(180),quality(70)/https%3A%2F%2Ftrackercdn.com%2Fcdn%2Ftracker.gg%2Fvalorant%2Ficons%2Ftiersv2%2F27.png/image.png";
 
-    let server = '';
-
-    calcularVitoriasNecessarias();
-
-    setInterval(calcularVitoriasNecessarias, 60 * 1000); // Recalcula a cada 1min
-    setInterval(() => location.reload(), 20 * 60 * 1000); // Recarrega a cada 20min
-
-    async function calcularVitoriasNecessarias() {
-      const jogador = await buscarDadosDoJogador();
-      if (!jogador) return;
-
-      const { currenttierpatched, ranking_in_tier, images } = jogador.mmr;
-      const [tier, division] = currenttierpatched.split(" ");
-
-      atualizarUI(tier, division, ranking_in_tier, images.small);
-
-      if (tier !== "Radiant") {
-        if(tier !== "Immortal"){
-          const pontosRestantes = calcularPontosRestantes(
-            tier.toUpperCase(),
-            division,
-            ranking_in_tier,
-            "IMMORTAL"
-            ) + CUTOFF;
-
-          const vitoriasNecessarias = Math.ceil(pontosRestantes / LP_POR_VITORIA);
-          exibirResultado(pontosRestantes, vitoriasNecessarias);
-        }else{
-          const pontosRestantes = CUTOFF - ranking_in_tier;
-          console.log("falta qnts pontos?",pontosRestantes);
-          const vitoriasNecessarias = Math.ceil(pontosRestantes / LP_POR_VITORIA);
-          exibirResultado(pontosRestantes, vitoriasNecessarias);
-        }
+    async function fetchPlayerData() {
+      const queryString = window.location.href.split('?')[1];
+      if (!queryString) {
+        showError("Coloque na URL: ?region=br1/nomedojogador#tag");
+        return null;
       }
+
+      const regex = /^region=([^\/]+)\/([^#]+)#(.+)$/;
+      const match = queryString.match(regex);
+      if (!match) {
+        showError("Formato inválido. Use: ?region=br1/nome#tag");
+        return null;
+      }
+
+      const [, server, name, tag] = match;
+      return fetchFromApi(server, name, tag);
     }
 
-
-    async function buscarDadosDoJogador() {
-      const query = window.location.href.split('?')[1];
-      if (!query) return exibirErro("Coloque na URL: ?region=br1/nomedojogador#tag");
-
-      const match = query.match(/^region=([^\/]+)\/([^#]+)#(.+)$/);
-      if (!match) return exibirErro("Formato inválido. Use: ?region=br1/nome#tag");
-
-      [, server, name, tag] = match;
-      const nickname = decodeURIComponent(`${name}#${tag}`);
-      document.getElementById("name").innerText = nickname;
-
+    async function fetchFromApi(server, name, tag) {
       try {
-        const res = await fetch(`/api/riot-valorant/player/${server}/${name}/${tag}`);
-        const data = await res.json();
-        console.log("jogador??",data);
-        if(data.error){
-          return exibirErro("MMR Do jogador não encontrado");
+        const response = await fetch(`/api/riot-valorant/player/${server}/${name}/${tag}`);
+        const data = await response.json();
+        if (data.error) {
+          showError("MMR do jogador não encontrado");
+          return null;
         }
         return data;
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
-        return exibirErro("Erro ao buscar dados da API.");
+        showError("Erro ao buscar dados da API.");
+        return null;
       }
     }
 
-    function calcularPontosRestantes(tierAtual, divisaoAtual, lpAtual, tierAlvo) {
-      console.log("lp atual", lpAtual, tierAtual, divisaoAtual, tierAlvo);
-      const tierIndexAtual = TIERS.indexOf(tierAtual);
-      const divisaoIndexAtual = DIVISIONS.indexOf(divisaoAtual);
-      const tierIndexAlvo = TIERS.indexOf(tierAlvo);
-
-      console.log(tierIndexAlvo, divisaoIndexAtual, tierIndexAlvo);
-
-      if (tierIndexAtual === -1 || divisaoIndexAtual === -1 || tierIndexAlvo === -1 || tierIndexAlvo <= tierIndexAtual) {
-        console.log("caiu fora");
-        return 0;
+    function updateUI(player) {
+      if (!player || !player.account || !player.mmr) {
+        showError("Dados incompletos do jogador.");
+        return;
       }
 
-      let pontosRestantes = (DIVISIONS.length - divisaoIndexAtual - 1) * LP_POR_DIVISAO;
-      pontosRestantes += LP_POR_DIVISAO - lpAtual;
+      const { gameName, tagLine } = player.account;
+      const { currenttierpatched, ranking_in_tier, images, vitoriasNecessarias } = player.mmr;
 
-      for (let i = tierIndexAtual + 1; i < tierIndexAlvo; i++) {
-        pontosRestantes += DIVISIONS.length * LP_POR_DIVISAO;
+      // Nome
+      document.getElementById("name").innerText = `${gameName}#${tagLine}`;
+
+      // Elo imagem
+      const eloImage = document.getElementById("elo-image");
+      eloImage.src = images.small;
+      eloImage.alt = currenttierpatched;
+
+      // Rank e LP
+      document.getElementById("rank-points").innerText = `${currenttierpatched} - ${ranking_in_tier} LP`;
+
+      // Resultado
+      const resultadoEl = document.getElementById("resultado");
+      if (vitoriasNecessarias <= 0) {
+        resultadoEl.textContent = "Parabéns! Você conseguiu!!!";
+      } else {
+        resultadoEl.innerHTML = `
+          ${vitoriasNecessarias} Wins para o 
+          <img src="${IMMORTAL_ICON_URL}" alt="Immortal" class="inline-icon" />
+        `;
       }
-      console.log("pontos restantes ", pontosRestantes);
-      return pontosRestantes;
+
+      // KDA (não disponível, limpar)
+      document.getElementById("kda").textContent = "";
     }
 
-    function atualizarUI(tier, divisao, lp, imagemElo) {
-      document.getElementById("elo-image").src = imagemElo;
-      document.getElementById("rank-points").innerText = divisao
-        ? `${tier} ${divisao} - ${lp} LP`
-        : `${tier} - ${lp} LP`;
+    function showError(message) {
+      const resultadoEl = document.getElementById("resultado");
+      resultadoEl.textContent = message;
     }
 
-    function exibirResultado(pontosRestantes, vitoriasNecessarias) {
-      const resultado = document.getElementById("resultado");
-      resultado.innerHTML = pontosRestantes <= 0
-        ? `Parabéns! Você conseguiu!!!`
-        : `${vitoriasNecessarias} Wins para o 
-          <img src="https://imgsvc.trackercdn.com/url/max-width(180),quality(70)/https%3A%2F%2Ftrackercdn.com%2Fcdn%2Ftracker.gg%2Fvalorant%2Ficons%2Ftiersv2%2F27.png/image.png"
-               alt="Immortal"
-               class="inline-icon" />`;
+    async function refreshData() {
+      const playerData = await fetchPlayerData();
+      if (playerData) {
+        updateUI(playerData);
+      }
     }
 
-    function exibirErro(msg) {
-      document.getElementById("resultado").innerText = msg;
-      return null;
-    }
+    // Inicializa
+    refreshData();
+
+    // Atualiza a cada 1 minuto
+    setInterval(refreshData, 60 * 1000);
+
+    // Recarrega a página a cada 20 minutos
+    setInterval(() => location.reload(), 20 * 60 * 1000);
   </script>
 </body>
 </html>
