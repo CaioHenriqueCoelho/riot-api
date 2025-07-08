@@ -18,3 +18,5 @@ Este projeto oferece uma API que busca dados de conta e MMR do jogador no Valora
 Você pode acessar o projeto no ar para o público em:  
 [desafiante.online](https://desafiante.online)
 
+![Demonstração do app](video_example.gif)
+
