@@ -69,7 +69,8 @@
           leaguePoints = 0,
           wins = 0,
           losses = 0,
-          vitoriasNecessarias = 0
+          vitoriasNecessarias = 0,
+          winrate = 0
         } = jogador;
 
         const rankCompleto = `${capitalize(tier.toLowerCase())} ${rank}`;
@@ -91,8 +92,8 @@
         const kdaEl = document.getElementById("kda");
         if (kdaEl) {
           kdaEl.innerHTML = `
-            <span style="color: #00ff00;">W: ${wins}</span> |
-            <span style="color: #ff4d4d;">L: ${losses}</span>
+            <span style="color: #00ff00;">Wins: ${wins}</span> |
+            <span style="color: #ff4d4d;">Losses: ${losses}</span><p>Winrate: ${winrate}</p>
           `;
         }
 

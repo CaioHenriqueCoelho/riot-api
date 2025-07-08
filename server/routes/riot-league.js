@@ -28,8 +28,17 @@ router.get('/player/:region/:name/:tag', async (req, res) => {
     }
 
     soloQueueInfo.cutoff = await fetchChallengerCutoff();
-    soloQueueInfo.vitoriasNecessarias = calcularVitoriasNecessariasParaChallenger(soloQueueInfo).vitoriasNecessarias;
+    if(soloQueueInfo.tier == "GRANDMASTER" || soloQueueInfo.tier == "MASTER") {
+      let valor =  (soloQueueInfo.cutoff - soloQueueInfo.leaguePoints ) / 20;
+      console.log("VALOR",valor);
+      soloQueueInfo.vitoriasNecessarias = Math.ceil(valor);
+    }else{
+      soloQueueInfo.vitoriasNecessarias = calcularVitoriasNecessariasParaChallenger(soloQueueInfo).vitoriasNecessarias;
+    }
+    soloQueueInfo.winrate = (soloQueueInfo.wins / (soloQueueInfo.wins + soloQueueInfo.losses)) * 100;
+    soloQueueInfo.winrate = soloQueueInfo.winrate.toFixed(2) + ' %';
 
+    console.log("...", soloQueueInfo);
     return res.json({ info: soloQueueInfo });
 
   } catch (err) {
